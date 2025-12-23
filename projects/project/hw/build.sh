@@ -1,8 +1,8 @@
 #!/bin/bash
 
-VERSION="v23.1"
+VERSION="v24.1"
 
-COPYRIGHT="ShanghaiTech University\nIntelligent Computing System"
+COPYRIGHT="ShanghaiTech University\n AI Computing System"
 
 EMU_FILE="emu"
 V_TOP_FILE="top.v"
@@ -15,11 +15,14 @@ LDFLAGS="-lz"
 GDB="false"
 CLEAN="false"
 
-PROJ_FOLDER=$PWD
-SOURCE_FOLDER=$PROJ_FOLDER/src
+SCRIPT_DIR=$(dirname "$(readlink -f "$0")")
+BASH_PWD=$PWD
+
+PROJ_FOLDER=$SCRIPT_DIR
+SOURCE_FOLDER=$PROJ_FOLDER
 VSRC_FOLDER="vsrc"
 CSRC_FOLDER="csrc"
-BUILD_PATH=$PROJ_FOLDER/build/hw
+BUILD_PATH=$PROJ_FOLDER/build
 
 while getopts 't:bsgca:f:l:v:' OPT; do
     case $OPT in
@@ -35,8 +38,17 @@ while getopts 't:bsgca:f:l:v:' OPT; do
     esac
 done
 
-build_proj() {
+create_dir_if_not_exists() {
+    local dir_path=$1
+    if [ ! -d "$dir_path" ]; then
+        mkdir -p "$dir_path"
+        echo "Created directory: $dir_path"
+    else
+        echo "Directory already exists: $dir_path"
+    fi
+}
 
+build_proj() {
     # get all .cpp files
     CSRC_LIST=`find -L $SOURCE_FOLDER/$CSRC_FOLDER -name "*.cpp"`
     for CSRC_FILE in ${CSRC_LIST[@]}
@@ -69,6 +81,8 @@ build_proj() {
     fi
 }
 
+# Check build-dir
+create_dir_if_not_exists $BUILD_PATH
 
 # Build
 if [[ "$BUILD" == "true" ]]; then
@@ -91,6 +105,6 @@ fi
 
 # Clean
 if [[ "$CLEAN" == "true" ]]; then
-    rm -rf $PROJECT_PATH/$BUILD_FOLDER
+    rm -rf $BUILD_PATH
     exit 0
 fi
