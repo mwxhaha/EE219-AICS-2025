@@ -13,7 +13,7 @@ import numpy as np
 CIFAR10_PATH    = "/home/ubuntu/data"
 MODEL_PATH      = "model_lab2.pth"
 BIN_SAVE_PATH   = "../data/bin/"
-# NPY_SAVE_PATH   = "../data/npy/"
+NPY_SAVE_PATH   = "../data/npy/"
 
 ADDR_BASE           = 0x80800000
 ADDR_INPUT          = 0x80800000
@@ -270,7 +270,16 @@ def main():
 
     print("===============================================================\n")
 
-    # np.save(os.path.join(NPY_SAVE_PATH, "golden.npy"), fc2_raw)
+    np.save(os.path.join(NPY_SAVE_PATH, "input_img.npy"), input_img)
+    np.save(os.path.join(NPY_SAVE_PATH, "kernel.npy"), kernel)
+    np.save(os.path.join(NPY_SAVE_PATH, "conv_raw.npy"), conv_raw)
+    np.save(os.path.join(NPY_SAVE_PATH, "conv_q.npy"), conv_q)
+    np.save(os.path.join(NPY_SAVE_PATH, "pool_q.npy"), pool_q)
+    np.save(os.path.join(NPY_SAVE_PATH, "fc1_w.npy"), fc1_w)
+    np.save(os.path.join(NPY_SAVE_PATH, "fc1_raw.npy"), fc1_raw)
+    np.save(os.path.join(NPY_SAVE_PATH, "fc2_w.npy"), fc2_w)
+    np.save(os.path.join(NPY_SAVE_PATH, "fc2_b.npy"), fc2_b)
+    np.save(os.path.join(NPY_SAVE_PATH, "fc2_raw.npy"), fc2_raw)
 
 if __name__=='__main__':
     main()
