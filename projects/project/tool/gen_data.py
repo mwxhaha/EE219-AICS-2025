@@ -280,6 +280,7 @@ def main():
     np.save(os.path.join(NPY_SAVE_PATH, "fc2_w.npy"), fc2_w)
     np.save(os.path.join(NPY_SAVE_PATH, "fc2_b.npy"), fc2_b)
     np.save(os.path.join(NPY_SAVE_PATH, "fc2_raw.npy"), fc2_raw)
+    np.save(os.path.join(NPY_SAVE_PATH, "golden.npy"), sm_q16_16)
 
 if __name__=='__main__':
     main()
