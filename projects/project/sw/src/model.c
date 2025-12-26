@@ -1,6 +1,6 @@
 #include "model.h"
-#include "trap.h"
 #include "scalar.c"
+#include "trap.h"
 
 int main() {
     int8_t (*input)[14][14] = (int8_t (*)[14][14])ADDR_INPUT;
@@ -30,11 +30,11 @@ int main() {
 
     fc2(outputfc1, weightfc2, biasfc2, outputfc2);
 
-    softmax(outputfc2, softmaxlut,outputsoftmax);
+    softmax(outputfc2, softmaxlut, outputsoftmax);
 
     // for (int i = 0; i < 10; i++) {
     //     printf("%d ", outputsoftmax[i]);
     // }
 
-    return 0; 
+    return 0;
 }
