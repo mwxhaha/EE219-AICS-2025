@@ -37,21 +37,21 @@ void maxpool(int16_t input[4][12][12], int16_t output[4][6][6]) {
     }
 }
 
-void fc1(int16_t input[4][6][6], int16_t weight[60][144], int32_t output[60], int32_t scale) {
+void fc1(int16_t input[144], int16_t weight[144][60], int32_t output[60], int32_t scale) {
     for (int i = 0; i < 60; i++) {
         int32_t sum = 0;
         for (int j = 0; j < 144; j++) {
-            sum += (int32_t)((int16_t *)input)[j] * (int32_t)weight[i][j];
+            sum += (int32_t)input[j] * (int32_t)weight[j][i];
         }
         output[i] = (sum > 0) ? sum / scale : 0;
     }
 }
 
-void fc2(int32_t input[60], int32_t weight[10][60], int32_t bias[10], int32_t output[10]) {
+void fc2(int32_t input[60], int32_t weight[60][10], int32_t bias[10], int32_t output[10]) {
     for (int i = 0; i < 10; i++) {
         int32_t sum = bias[i];
         for (int j = 0; j < 60; j++) {
-            sum += (int32_t)input[j] * (int32_t)weight[i][j];
+            sum += (int32_t)input[j] * (int32_t)weight[j][i];
         }
         output[i] = sum;
     }
@@ -59,59 +59,45 @@ void fc2(int32_t input[60], int32_t weight[10][60], int32_t bias[10], int32_t ou
 
 void softmax(int32_t input[10], int32_t softmaxlut[256], int32_t output[10]) {
     int32_t Q = 16;
-    int32_t Q_16 = (1 << Q);
-    int32_t LUT_SIZE = 256;
-    int32_t SAFE_SHIFT = 2;
+    int32_t Q_16 = 1 << Q;
 
-    int size = 10;
     int32_t x_q16_16[10];
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < 10; i++) {
         int32_t clipped = input[i];
         if (clipped < -32767)
             clipped = -32767;
         if (clipped > 32767)
             clipped = 32767;
-        x_q16_16[i] = clipped << 16;
+        x_q16_16[i] = clipped * Q_16;
     }
 
     int32_t x_max = x_q16_16[0];
-    for (int i = 1; i < size; i++) {
+    for (int i = 1; i < 10; i++) {
         if (x_q16_16[i] > x_max) {
             x_max = x_q16_16[i];
         }
     }
-
     int32_t exp_delta[10];
     int32_t exp_sum = 0;
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < 10; i++) {
         int32_t delta = x_q16_16[i] - x_max;
         if (delta < -8 * Q_16)
             delta = -8 * Q_16;
         if (delta > 0)
             delta = 0;
 
-        int32_t idx_num = (delta + 8 * Q_16) * (LUT_SIZE - 1);
+        int32_t idx_num = (delta + 8 * Q_16) * 255;
         int32_t idx = idx_num / (8 * Q_16);
-        if (idx < 0)
-            idx = 0;
-        if (idx >= LUT_SIZE)
-            idx = LUT_SIZE - 1;
 
         exp_delta[i] = softmaxlut[idx];
+
         exp_sum += exp_delta[i];
     }
 
-    if (exp_sum <= 0) {
-        exp_sum = 1;
-    }
+    int32_t exp_sum_shr = exp_sum / 4;
+    for (int i = 0; i < 10; i++) {
+        int32_t exp_delta_shr = exp_delta[i] / 4;
 
-    int32_t exp_sum_shr = exp_sum >> SAFE_SHIFT;
-    if (exp_sum_shr <= 0) {
-        exp_sum_shr = 1;
-    }
-
-    for (int i = 0; i < size; i++) {
-        int32_t exp_delta_shr = exp_delta[i] >> SAFE_SHIFT;
         int32_t num = exp_delta_shr * Q_16;
         int32_t softmax_q16_16 = num / exp_sum_shr;
         output[i] = softmax_q16_16;

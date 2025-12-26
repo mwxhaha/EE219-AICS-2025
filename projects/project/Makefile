@@ -4,11 +4,11 @@ export AM_HOME=$(TOP_PATH)/sw/libraries/abstract-machine
 # You can modify the code here
 # =====================================
 # Instruction
-CFILE=hello-str
+CFILE=model
 # Data-Format
 INPUT_NHWC=false
 CONV_WEIGHT_NHWC=false
-FC_WEIGHT_TRANS=false
+FC_WEIGHT_TRANS=true
 # Data-Image
 DATA=data
 # Save-File-Name

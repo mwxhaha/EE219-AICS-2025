@@ -13,12 +13,12 @@ int main() {
     int16_t (*outputpool1)[6][6] = (int16_t (*)[6][6])ADDR_OUTPOOL1;
     maxpool(outputconv1, outputpool1);
 
-    int16_t (*weightfc1)[144] = (int16_t (*)[144])ADDR_WFC1;
+    int16_t (*weightfc1)[60] = (int16_t (*)[60])ADDR_WFC1;
     int32_t scalefc1 = *((int32_t *)ADDR_SFC1);
     int32_t *outputfc1 = (int32_t *)ADDR_OUTFC1;
-    fc1(outputpool1, weightfc1, outputfc1, scalefc1);
+    fc1((int16_t *)outputpool1, weightfc1, outputfc1, scalefc1);
 
-    int32_t (*weightfc2)[60] = (int32_t (*)[60])ADDR_WFC2;
+    int32_t (*weightfc2)[10] = (int32_t (*)[10])ADDR_WFC2;
     int32_t *biasfc2 = (int32_t *)ADDR_BFC2;
     int32_t *outputfc2 = (int32_t *)ADDR_OUTFC2;
     fc2(outputfc1, weightfc2, biasfc2, outputfc2);
@@ -28,8 +28,13 @@ int main() {
     softmax(outputfc2, softmaxlut, outputsoftmax);
 
     // for (int i = 0; i < 10; i++) {
+    //     printf("%d ", outputfc2[i]);
+    // }
+    // printf("\n");
+    // for (int i = 0; i < 10; i++) {
     //     printf("%d ", outputsoftmax[i]);
     // }
+    // printf("\n");
 
     return 0;
 }
