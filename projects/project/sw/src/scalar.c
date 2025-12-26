@@ -1,6 +1,6 @@
 #include "trap.h"
 
-void conv(int8_t input[6][14][14], int8_t weight[4][6][3][3], int16_t scale, int16_t output[4][12][12]) {
+void conv1(int8_t input[6][14][14], int8_t weight[4][6][3][3], int16_t scale, int16_t output[4][12][12]) {
     for (int f = 0; f < 4; f++) {
         for (int h = 0; h < 12; h++) {
             for (int w = 0; w < 12; w++) {
@@ -18,7 +18,7 @@ void conv(int8_t input[6][14][14], int8_t weight[4][6][3][3], int16_t scale, int
     }
 }
 
-void maxpool(int16_t input[4][12][12], int16_t output[4][6][6]) {
+void pool1(int16_t input[4][12][12], int16_t output[4][6][6]) {
     for (int c = 0; c < 4; c++) {
         for (int h = 0; h < 6; h++) {
             for (int w = 0; w < 6; w++) {
@@ -57,7 +57,7 @@ void fc2(int32_t input[60], int32_t weight[60][10], int32_t bias[10], int32_t ou
     }
 }
 
-void softmax(int32_t input[10], int32_t softmaxlut[256], int32_t output[10]) {
+void softmax2(int32_t input[10], int32_t softmaxlut[256], int32_t output[10]) {
     int32_t Q = 16;
     int32_t Q_16 = 1 << Q;
 

@@ -8,7 +8,7 @@ int main() {
     int8_t (*weightconv1)[6][3][3] = (int8_t (*)[6][3][3])ADDR_WCONV1;
     int16_t scaleconv1 = *((int16_t *)ADDR_SCONV1);
     int16_t (*outputconv1)[12][12] = (int16_t (*)[12][12])ADDR_OUTCONV1;
-    conv(input, weightconv1, scaleconv1, outputconv1);
+    conv1(input, weightconv1, scaleconv1, outputconv1);
 
     // for (int f = 0; f < 4; f++) {
     //     for (int h = 0; h < 12; h++) {
@@ -22,7 +22,7 @@ int main() {
     // printf("\n");
 
     int16_t (*outputpool1)[6][6] = (int16_t (*)[6][6])ADDR_OUTPOOL1;
-    maxpool(outputconv1, outputpool1);
+    pool1(outputconv1, outputpool1);
 
     // for (int c = 0; c < 4; c++) {
     //     for (int h = 0; h < 6; h++) {
@@ -56,11 +56,11 @@ int main() {
     // printf("\n");
 
     int32_t *softmaxlut = (int32_t *)ADDR_SOFTMAX_LUT;
-    int32_t *outputsoftmax = (int32_t *)ADDR_OUTSM2;
-    softmax(outputfc2, softmaxlut, outputsoftmax);
+    int32_t *outputsoftmax2 = (int32_t *)ADDR_OUTSM2;
+    softmax2(outputfc2, softmaxlut, outputsoftmax2);
 
     // for (int i = 0; i < 10; i++) {
-    //     printf("%d ", outputsoftmax[i]);
+    //     printf("%d ", outputsoftmax2[i]);
     // }
     // printf("\n");
 
