@@ -1,122 +1,64 @@
 #include "trap.h"
 
-void vle_v(register int *vd, register int *rs1) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1));
-} // 加载512位
-
-void vse_v(register int *rs1, register int *vs3) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(rs1), "r"(vs3));
-} // 存储512位
-
 // 所有向量寄存器初始化0
 
+// 加载512位
+#define vle_v(vd, rs1) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x0" ::"r"(rs1))
+// 存储512位
+#define vse_v(vs3, rs1) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vs3 ", %0,  x0" ::"r"(rs1))
+
 // conv1
-void vmul8to16_vv(register int *vd, register int *vs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(vs1), "r"(vs2));
-} // 32个8位元素相乘得到32个16位元素，多余元素忽略
-void vmul8to16_vx(register int *vd, register int *rs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1), "r"(vs2));
-}
-void vmul8to16_vi(register int *vd, register int *imm, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x3, 0x01, %0, %1, %2" : : "r"(vd), "r"(imm), "r"(vs2));
-}
+// 32个8位元素相乘得到32个16位元素，多余元素忽略
+#define vmul8to16_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vmul8to16_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vmul8to16_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-void vadd16_vv(register int *vd, register int *vs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(vs1), "r"(vs2));
-} // 32个16位元素相加得到32个16位元素，多余元素忽略
-void vadd16_vx(register int *vd, register int *rs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1), "r"(vs2));
-}
-void vadd16_vi(register int *vd, register int *imm, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x3, 0x01, %0, %1, %2" : : "r"(vd), "r"(imm), "r"(vs2));
-}
+// 32个16位元素相加得到32个16位元素，多余元素忽略
+#define vadd16_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vadd16_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vadd16_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-void vdiv16_vx(register int *vd, register int *rs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1), "r"(vs2));
-}
+#define vdiv16_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
 
-void vmax16_vi(register int *vd, register int *imm, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(vd), "r"(imm), "r"(vs2));
-}
+#define vmax16_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
 
 // pool1
-void vpool16_vv(register int *vd, register int *vs1) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(vd), "r"(vs1), "r"(0));
-} // 24个16位元素池化得到6个16位元素，多余元素忽略，多余结果元素置0
+// 24个16位元素池化得到6个16位元素，多余元素忽略，多余结果元素置0
+#define vpool16_vv(vd, vs1) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x0")
 
 // fc1
-void vmul16to32_vv(register int *vd, register int *vs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(vs1), "r"(vs2));
-}
-void vmul16to32_vx(register int *vd, register int *rs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1), "r"(vs2));
-}
-void vmul16to32_vi(register int *vd, register int *imm, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x3, 0x01, %0, %1, %2" : : "r"(vd), "r"(imm), "r"(vs2));
-}
+#define vmul16to32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vmul16to32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vmul16to32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-void vadd32_vv(register int *vd, register int *vs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(vs1), "r"(vs2));
-}
-void vadd32_vx(register int *vd, register int *rs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1), "r"(vs2));
-}
-void vadd32_vi(register int *vd, register int *imm, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x3, 0x01, %0, %1, %2" : : "r"(vd), "r"(imm), "r"(vs2));
-}
+#define vadd32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vadd32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vadd32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-void vdiv32_vx(register int *vd, register int *rs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1), "r"(vs2));
-}
+#define vdiv32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vdiv32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vdiv32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-void vmax32_vi(register int *vd, register int *imm, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(vd), "r"(imm), "r"(vs2));
-}
+#define vmax32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vmax32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vmax32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
 
 // fc2
-void vmul32_vv(register int *vd, register int *vs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(vs1), "r"(vs2));
-}
-void vmul32_vx(register int *vd, register int *rs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1), "r"(vs2));
-}
-void vmul32_vi(register int *vd, register int *imm, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x3, 0x01, %0, %1, %2" : : "r"(vd), "r"(imm), "r"(vs2));
-}
+#define vmul32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vmul32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vmul32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
 
 // softmax2
-void vmax32_vx(register int *vd, register int *rs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1), "r"(vs2));
-}
+#define vmin32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vmin32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vmin32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-void vmin32_vx(register int *vd, register int *rs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1), "r"(vs2));
-}
+#define vsub32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vsub32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vsub32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-void vsub32_vv(register int *vd, register int *vs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(vs1), "r"(vs2));
-}
-void vsub32_vx(register int *vd, register int *rs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1), "r"(vs2));
-}
-void vsub32_vi(register int *vd, register int *imm, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x3, 0x01, %0, %1, %2" : : "r"(vd), "r"(imm), "r"(vs2));
-}
+// 对vs1第1个元素和vs2的前10个元素求最大，将结果写入vd每个元素中
+#define vred10max32_vs(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
 
-void vdiv32_vv(register int *vd, register int *vs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(vs1), "r"(vs2));
-}
-void vdiv32_vx(register int *vd, register int *rs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x4, 0x01, %0, %1, %2" : : "r"(vd), "r"(rs1), "r"(vs2));
-}
-void vdiv32_vi(register int *vd, register int *imm, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x3, 0x01, %0, %1, %2" : : "r"(vd), "r"(imm), "r"(vs2));
-}
-
-void vred10max32_vs(register int *vd, register int *vs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(vs1), "r"(vs2));
-} // 对vs1第1个元素和vs2的前10个元素求最大，将结果写入vd每个元素中
-
-void vred10sum32_vs(register int *vd, register int *vs1, register int *vs2) {
-    asm volatile(".insn r 0x57, 0x0, 0x01, %0, %1, %2" : : "r"(vd), "r"(vs1), "r"(vs2));
-} // 对vs1第1个元素和vs2的前10个元素求和，将结果写入vd每个元素中
+// 对vs1第1个元素和vs2的前10个元素求和，将结果写入vd每个元素中
+#define vred10sum32_vs(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
