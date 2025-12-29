@@ -1,4 +1,5 @@
 #include "model.h"
+#include "inst.c"
 #include "scalar.c"
 #include "trap.h"
 #include "vector.c"

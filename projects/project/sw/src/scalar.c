@@ -1,3 +1,4 @@
+#include "inst.c"
 #include "trap.h"
 
 void conv1(int8_t input[6][14][14], int8_t weight[4][6][3][3], int16_t scale, int16_t output[4][12][12]) {
