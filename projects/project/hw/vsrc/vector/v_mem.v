@@ -1,9 +1,8 @@
-
-module v_mem_access #(
-    parameter VMEM_DW   = 256,
-    parameter VMEM_AW   = 32,
-    parameter VRAM_DW   = 256,
-    parameter VRAM_AW   = 32
+module v_mem #(
+    parameter VMEM_DW   = 512,
+    parameter VMEM_AW   = 64,
+    parameter VRAM_DW   = 512,
+    parameter VRAM_AW   = 64
 )(
     input                   clk,
     input                   rst,

@@ -25,24 +25,24 @@ void custom_putch_2() {
 // 所有向量寄存器初始化0
 
 // 加载512位
-#define vle_v(vd, rs1) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x0" ::"r"(rs1))
+#define vle_v(vd, rs1) asm volatile(".insn r 0x07, 0x4, 0x01,  x" #vd ", %0,  x0" ::"r"(rs1))
 // 存储512位
-#define vse_v(vs3, rs1) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vs3 ", %0,  x0" ::"r"(rs1))
+#define vse_v(vs3, rs1) asm volatile(".insn r 0x27, 0x4, 0x01,  x" #vs3 ", %0,  x0" ::"r"(rs1))
 
 // conv1
 // 32个8位元素相乘得到32个16位元素，多余元素忽略
-#define vmul8to16_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
-#define vmul8to16_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
-#define vmul8to16_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
+#define vmul8to16_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x00, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vmul8to16_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x00,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vmul8to16_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x00,  x" #vd ", x" #imm ",  x" #vs2 "")
 
 // 32个16位元素相加得到32个16位元素，多余元素忽略
 #define vadd16_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
 #define vadd16_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
 #define vadd16_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-#define vdiv16_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vdiv16_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x02,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
 
-#define vmax16_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
+#define vmax16_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x03,  x" #vd ", x" #imm ",  x" #vs2 "")
 
 // pool1
 // 24个16位元素池化得到6个16位元素，多余元素忽略，多余结果元素置0

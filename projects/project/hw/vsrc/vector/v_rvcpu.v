@@ -18,5 +18,161 @@ module v_rvcpu(
     output  [`VRAM_DATA_BUS]    vram_w_data,
     output  [`VRAM_DATA_BUS]    vram_w_mask
 );
+    // Internal wires between modules
+    // v_inst_decode outputs
+    wire                  rs1_en;
+    wire  [`SREG_ADDR_BUS] rs1_addr;
+    wire                  vs1_en;
+    wire  [`VREG_ADDR_BUS] vs1_addr;
+    wire                  vs2_en;
+    wire  [`VREG_ADDR_BUS] vs2_addr;
+    wire  [4:0]           valu_opcode;  // VALUOP_DW = 5
+    wire  [`VREG_BUS]     operand_v1;
+    wire  [`VREG_BUS]     operand_v2;
+    wire                  vmem_ren;
+    wire                  vmem_wen;
+    wire  [`VMEM_ADDR_BUS] vmem_addr;
+    wire  [`VMEM_DATA_BUS] vmem_din;
+    wire                  vid_wb_en;
+    wire                  vid_wb_sel;
+    wire  [`VREG_ADDR_BUS] vid_wb_addr;
+    
+    // v_regfile outputs
+    wire  [`VREG_BUS]     vs1_dout;
+    wire  [`VREG_BUS]     vs2_dout;
+    
+    // v_execute output
+    wire  [`VREG_BUS]     valu_result;
+    
+    // v_mem outputs
+    wire  [`VREG_BUS]     vmem_dout;
+    
+    // v_write_back outputs
+    wire                  vwb_en;
+    wire  [`VREG_ADDR_BUS] vwb_addr;
+    wire  [`VREG_BUS]     vwb_data;
+
+    // Instantiate v_inst_decode module
+    v_inst_decode #(
+        .VALUOP_DW(5),
+        .VMEM_DW(`VLEN),
+        .VMEM_AW(64),
+        .VREG_DW(`VLEN),
+        .VREG_AW(5),
+        .INST_DW(32),
+        .REG_DW(64),
+        .REG_AW(5)
+    ) u_v_inst_decode (
+        .clk(clk),
+        .rst(rst),
+        
+        .inst_i(inst),
+        
+        .rs1_en_o(rs1_en),
+        .rs1_addr_o(rs1_addr),
+        .rs1_dout_i(vec_rs1_data),
+        
+        .vs1_en_o(vs1_en),
+        .vs1_addr_o(vs1_addr),
+        .vs1_dout_i(vs1_dout),
+        
+        .vs2_en_o(vs2_en),
+        .vs2_addr_o(vs2_addr),
+        .vs2_dout_i(vs2_dout),
+        
+        .valu_opcode_o(valu_opcode),
+        .operand_v1_o(operand_v1),
+        .operand_v2_o(operand_v2),
+        
+        .vmem_ren_o(vmem_ren),
+        .vmem_wen_o(vmem_wen),
+        .vmem_addr_o(vmem_addr),
+        .vmem_din_o(vmem_din),
+        
+        .vid_wb_en_o(vid_wb_en),
+        .vid_wb_sel_o(vid_wb_sel),
+        .vid_wb_addr_o(vid_wb_addr)
+    );
+
+    // Instantiate v_regfile module
+    v_regfile #(
+        .VREG_DW(`VLEN),
+        .VREG_AW(5)
+    ) u_v_regfile (
+        .clk(clk),
+        .rst(rst),
+        
+        .vwb_en_i(vwb_en),
+        .vwb_addr_i(vwb_addr),
+        .vwb_data_i(vwb_data),
+        
+        .vs1_en_i(vs1_en),
+        .vs1_addr_i(vs1_addr),
+        .vs1_data_o(vs1_dout),
+        
+        .vs2_en_i(vs2_en),
+        .vs2_addr_i(vs2_addr),
+        .vs2_data_o(vs2_dout)
+    );
+
+    // Instantiate v_execute module
+    v_execute #(
+        .VALUOP_DW(5),
+        .VREG_DW(`VLEN)
+    ) u_v_execute (
+        .clk(clk),
+        .rst(rst),
+        
+        .valu_opcode_i(valu_opcode),
+        .operand_v1_i(operand_v1),
+        .operand_v2_i(operand_v2),
+        .valu_result_o(valu_result)
+    );
+
+    // Instantiate v_mem module
+    v_mem #(
+        .VMEM_DW(`VLEN),
+        .VMEM_AW(64),
+        .VRAM_DW(`VLEN),
+        .VRAM_AW(64)
+    ) u_v_mem (
+        .clk(clk),
+        .rst(rst),
+        
+        .vmem_ren_i(vmem_ren),
+        .vmem_wen_i(vmem_wen),
+        .vmem_addr_i(vmem_addr),
+        .vmem_din_i(vmem_din),
+        .vmem_dout_o(vmem_dout),
+        
+        .vram_ren_o(vram_r_ena),
+        .vram_wen_o(vram_w_ena),
+        .vram_addr_o(vram_w_addr), 
+        .vram_mask_o(vram_w_mask),
+        .vram_din_o(vram_w_data),
+        .vram_dout_i(vram_r_data)
+    );
+
+    // Instantiate v_write_back module
+    v_write_back #(
+        .VREG_DW(`VLEN),
+        .VREG_AW(5)
+    ) u_v_write_back (
+        .clk(clk),
+        .rst(rst),
+        
+        .vid_wb_en_i(vid_wb_en),
+        .vid_wb_sel_i(vid_wb_sel),
+        .vid_wb_addr_i(vid_wb_addr),
+        .valu_result_i(valu_result),
+        .vmem_result_i(vmem_dout),
+        
+        .vwb_en_o(vwb_en),
+        .vwb_addr_o(vwb_addr),
+        .vwb_data_o(vwb_data)
+    );
+    assign vram_r_addr = vmem_addr;
+    assign vec_rs1_r_ena = rs1_en;
+    assign vec_rs1_r_addr = rs1_addr;
 
 endmodule
