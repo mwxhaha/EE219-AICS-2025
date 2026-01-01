@@ -19,6 +19,7 @@ module v_execute #(
   localparam VALU_OP_VADD32       = 5'd6  ;
   localparam VALU_OP_VDIV32       = 5'd7 ; 
   localparam VALU_OP_VMAX32       = 5'd8  ;
+  localparam VALU_OP_VMUL32       = 5'd9  ;
 
   wire signed [15:0] op1_elements16 [0:31];
   wire signed [15:0] op2_elements16 [0:31];
@@ -99,6 +100,13 @@ module v_execute #(
         for (j = 0; j < 16; j = j + 1) begin
           result_elements32[j] = (op2_elements32[j] > op1_elements32[j]) ? 
                               op2_elements32[j] : op1_elements32[j];
+          valu_result_o[j*32+:32] = result_elements32[j];
+        end
+      end
+      
+      VALU_OP_VMUL32: begin
+        for (j = 0; j < 16; j = j + 1) begin
+          result_elements32[j] = op2_elements32[j] * op1_elements32[j];
           valu_result_o[j*32+:32] = result_elements32[j];
         end
       end

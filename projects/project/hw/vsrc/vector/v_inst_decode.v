@@ -49,6 +49,7 @@ module v_inst_decode #(
   localparam VALU_OP_VADD32       = 5'd6  ;
   localparam VALU_OP_VDIV32       = 5'd7 ; 
   localparam VALU_OP_VMAX32       = 5'd8  ;
+  localparam VALU_OP_VMUL32       = 5'd9  ;
   wire [6:0]  opcode   = inst_i[6:0];
   wire [4:0]  vd       = inst_i[11:7];
   wire [2:0]  funct3   = inst_i[14:12];
@@ -152,6 +153,7 @@ module v_inst_decode #(
           vmem_addr = rs1_dout_i; 
           vmem_din = vs2_dout_i;  
       end
+
       7'b1010111: begin
         case (funct7)
           7'b000000: begin 
@@ -174,7 +176,6 @@ module v_inst_decode #(
               default: ;
             endcase
           end
-          
           7'b000001: begin
             vs2_en = 1'b1;
             operand_v2 = vs2_dout_i;
@@ -195,7 +196,6 @@ module v_inst_decode #(
               default: ;
             endcase
           end
-          
           7'b000010: begin
             vs2_en = 1'b1;
             operand_v2 = vs2_dout_i;
@@ -209,7 +209,6 @@ module v_inst_decode #(
               default: ;
             endcase
           end
-
           7'b000011: begin
             vs2_en = 1'b1;
             operand_v2 = vs2_dout_i;
@@ -243,7 +242,6 @@ module v_inst_decode #(
               default: ;
             endcase
           end
-          
           7'b000101: begin
             vs2_en = 1'b1;
             operand_v2 = vs2_dout_i;
@@ -264,7 +262,6 @@ module v_inst_decode #(
               default: ;
             endcase
           end
-          
           7'b000110: begin
             vs2_en = 1'b1;
             operand_v2 = vs2_dout_i;
@@ -285,7 +282,6 @@ module v_inst_decode #(
               default: ;
             endcase
           end
-
           7'b000111: begin
             vs2_en = 1'b1;
             operand_v2 = vs2_dout_i;
@@ -307,7 +303,27 @@ module v_inst_decode #(
             endcase
           end
 
-
+          7'b001000: begin
+            vs2_en = 1'b1;
+            operand_v2 = vs2_dout_i;
+            valu_opcode = VALU_OP_VMUL32;
+            vid_wb_en = 1'b1;
+            case (funct3)
+              3'b000: begin
+                vs1_en = 1'b1;
+                operand_v1 = vs1_dout_i;
+              end
+              3'b100: begin
+                rs1_en = 1'b1;
+                operand_v1 = {16{rs1_dout_i[31:0]}};
+              end
+              3'b011: begin
+                operand_v1 = {16{imm[31:0]}};
+              end
+              default: ;
+            endcase
+          end
+          
           default: ;
         endcase
       end

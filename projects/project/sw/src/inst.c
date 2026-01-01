@@ -66,9 +66,9 @@ void custom_putch_2() {
 #define vmax32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x07,  x" #vd ", x" #imm ",  x" #vs2 "")
 
 // fc2
-#define vmul32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
-#define vmul32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
-#define vmul32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
+#define vmul32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x08, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vmul32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x08,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vmul32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x08,  x" #vd ", x" #imm ",  x" #vs2 "")
 
 // softmax2
 #define vmin32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
