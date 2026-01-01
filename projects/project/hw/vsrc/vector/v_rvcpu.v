@@ -33,11 +33,15 @@ module v_rvcpu(
     wire                  vmem_wen;
     wire  [`VMEM_ADDR_BUS] vmem_addr;
     wire  [`VMEM_DATA_BUS] vmem_din;
+    wire  [4:0]           vmem_opcode;   // 新增: vmem操作码
+    wire  [31:0]          vmem_vs2select; // 新增: vs2选择信号
     wire                  vid_wb_en;
+    wire                  vid_wb_double;
     wire                  vid_wb_sel;
     wire  [`VREG_ADDR_BUS] vid_wb_addr;
     
     // v_regfile outputs
+    wire  [1023:0]        vd_data;       // 修改: 改为1024位宽
     wire  [`VREG_BUS]     vs1_dout;
     wire  [`VREG_BUS]     vs2_dout;
     
@@ -45,12 +49,13 @@ module v_rvcpu(
     wire  [`VREG_BUS]     valu_result;
     
     // v_mem outputs
-    wire  [`VREG_BUS]     vmem_dout;
+    wire  [1023:0]        vmem_dout;     // 修改: 改为1024位宽
     
     // v_write_back outputs
     wire                  vwb_en;
+    wire                  vwb_double;  // 新增: 双写使能信号
     wire  [`VREG_ADDR_BUS] vwb_addr;
-    wire  [`VREG_BUS]     vwb_data;
+    wire  [1023:0]        vwb_data;      // 修改: 改为1024位宽
 
     // Instantiate v_inst_decode module
     v_inst_decode #(
@@ -88,8 +93,11 @@ module v_rvcpu(
         .vmem_wen_o(vmem_wen),
         .vmem_addr_o(vmem_addr),
         .vmem_din_o(vmem_din),
+        .vmem_opcode_o(vmem_opcode),      // 新增: 连接vmem操作码
+        .vmem_vs2select_o(vmem_vs2select), // 新增: 连接vs2选择信号
         
         .vid_wb_en_o(vid_wb_en),
+        .vid_wb_double_o(vid_wb_double),
         .vid_wb_sel_o(vid_wb_sel),
         .vid_wb_addr_o(vid_wb_addr)
     );
@@ -103,8 +111,10 @@ module v_rvcpu(
         .rst(rst),
         
         .vwb_en_i(vwb_en),
+        .vwb_double_i(vwb_double),    // 新增: 双写使能信号 (注意: 子模块中拼写为vwb_doubleen_i，可能存在错误)
         .vwb_addr_i(vwb_addr),
         .vwb_data_i(vwb_data),
+        .vd_data_o(vd_data),             // 新增: vd数据输出
         
         .vs1_en_i(vs1_en),
         .vs1_addr_i(vs1_addr),
@@ -143,7 +153,10 @@ module v_rvcpu(
         .vmem_wen_i(vmem_wen),
         .vmem_addr_i(vmem_addr),
         .vmem_din_i(vmem_din),
-        .vmem_dout_o(vmem_dout),
+        .vmem_dout_o(vmem_dout),          // 修改: 改为1024位宽
+        .vmem_opcode_i(vmem_opcode),      // 新增: vmem操作码输入
+        .vmem_vs2select_i(vmem_vs2select), // 新增: vs2选择信号输入
+        .vd_data_i(vd_data),              // 新增: vd数据输入
         
         .vram_ren_o(vram_r_ena),
         .vram_wen_o(vram_w_ena),
@@ -162,12 +175,14 @@ module v_rvcpu(
         .rst(rst),
         
         .vid_wb_en_i(vid_wb_en),
+        .vid_wb_double_i(vid_wb_double),
         .vid_wb_sel_i(vid_wb_sel),
         .vid_wb_addr_i(vid_wb_addr),
         .valu_result_i(valu_result),
-        .vmem_result_i(vmem_dout),
+        .vmem_result_i(vmem_dout),        // 修改: 改为1024位宽
         
         .vwb_en_o(vwb_en),
+        .vwb_double_o(vwb_double),
         .vwb_addr_o(vwb_addr),
         .vwb_data_o(vwb_data)
     );

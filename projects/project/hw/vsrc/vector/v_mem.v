@@ -11,7 +11,10 @@ module v_mem #(
     input                   vmem_wen_i,
     input   [VMEM_AW-1:0]   vmem_addr_i,
     input   [VMEM_DW-1:0]   vmem_din_i,
-    output  [VMEM_DW-1:0]   vmem_dout_o,
+    output  [1024-1:0]      vmem_dout_o,
+    input  [5-1:0]          vmem_opcode_i,
+    input  [32-1:0]         vmem_vs2select_i,
+    input       [1024-1:0]  vd_data_i,
 
     output                  vram_ren_o,
     output                  vram_wen_o,
@@ -21,9 +24,13 @@ module v_mem #(
     input   [VRAM_DW-1:0]   vram_dout_i
 );
   
+  localparam VMEM_OP_NOP          = 5'd0  ;
+  localparam VMEM_OP_CONV1          = 5'd1  ;
+
   assign vram_ren_o   = vmem_ren_i ;
   assign vram_wen_o   = vmem_wen_i ;
   assign vram_addr_o  = vmem_addr_i ;
+
   reg [VMEM_DW-1:0] vram_din;
   always@(*) begin
     case (vmem_addr_i[2:0])
@@ -70,6 +77,26 @@ module v_mem #(
       default: ;
     endcase
   end
-  assign vmem_dout_o  = vmem_dout ;
+
+  wire [1024-1:0] conv_result;
+  generate
+    for (genvar i = 0; i < 64; i = i + 1) begin : conv_calc
+      wire [7:0]  vmem_8bit;
+      wire [15:0] vmem_16bit_sign_ext;
+      wire [15:0] vd_16bit;
+      wire [15:0] product;
+      
+      wire [7:0] vmem_8bit = vmem_dout[(i*8)+7 : (i*8)];
+      wire signed [15:0] vmem_16bit_sign_ext = {{8{vmem_8bit[7]}}, vmem_8bit};
+      wire signed [15:0] vd_16bit = vd_data_i[(i*16)+15 : (i*16)];
+      
+      assign conv_result[(i*16)+15 : (i*16)]=vd_16bit+$signed(vmem_vs2select_i[15:0]) * vmem_16bit_sign_ext;
+    end
+  endgenerate
+  
+  
+  assign vmem_dout_o  = vmem_opcode_i==VMEM_OP_NOP ? {512'b0,vmem_dout} : 
+                        vmem_opcode_i==VMEM_OP_CONV1 ? conv_result : 0;
+  
 
 endmodule

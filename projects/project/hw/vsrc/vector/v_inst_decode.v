@@ -33,10 +33,13 @@ module v_inst_decode #(
   output                  vmem_wen_o,
   output  [VMEM_AW-1:0]   vmem_addr_o,
   output  [VMEM_DW-1:0]   vmem_din_o,
+  output  [VALUOP_DW-1:0] vmem_opcode_o,
+  output  [32-1:0]        vmem_vs2select_o,
 
   output                  vid_wb_en_o,
   output                  vid_wb_sel_o,
-  output  [VREG_AW-1:0]   vid_wb_addr_o
+  output  [VREG_AW-1:0]   vid_wb_addr_o,
+  output                  vid_wb_double_o
 
 );
 
@@ -55,6 +58,9 @@ module v_inst_decode #(
   localparam VALU_OP_VSUB32       = 5'd11  ;
   localparam VALU_OP_VRED10MAX32  = 5'd12  ;
   localparam VALU_OP_VRED10SUM32  = 5'd13  ;
+  
+  localparam VMEM_OP_NOP          = 5'd0  ;
+  localparam VMEM_OP_CONV1          = 5'd1  ;
 
   wire [6:0]  opcode   = inst_i[6:0];
   wire [4:0]  vd       = inst_i[11:7];
@@ -107,10 +113,13 @@ module v_inst_decode #(
   reg                  vmem_ren;
   reg                  vmem_wen;
   reg                  vid_wb_en;
+  reg                  vid_wb_double;
   reg                  vid_wb_sel;
   reg                  wb_from_rs1;
   reg [VMEM_AW-1:0]    vmem_addr;
   reg [VMEM_DW-1:0]    vmem_din;
+  reg  [VALUOP_DW-1:0] vmem_opcode;
+  reg  [32-1:0]        vmem_vs2select;
   reg [VREG_DW-1:0]    operand_v1;
   reg [VREG_DW-1:0]    operand_v2;
   assign rs1_en_o = rs1_en;
@@ -126,7 +135,10 @@ module v_inst_decode #(
   assign vmem_wen_o = vmem_wen;
   assign vmem_addr_o = vmem_addr;
   assign vmem_din_o = vmem_din;
+  assign vmem_opcode_o= vmem_opcode;
+  assign vmem_vs2select_o= vmem_vs2select;
   assign vid_wb_en_o = vid_wb_en;
+  assign vid_wb_double_o = vid_wb_double;
   assign vid_wb_sel_o = vid_wb_sel;
   assign vid_wb_addr_o = vd;
   
@@ -138,9 +150,12 @@ module v_inst_decode #(
     vmem_ren = 1'b0;
     vmem_wen = 1'b0;
     vid_wb_en = 1'b0;
+    vid_wb_double = 1'b0;
     vid_wb_sel = 1'b0;
     vmem_addr = 64'b0;
     vmem_din = 512'b0;
+    vmem_opcode=VMEM_OP_NOP;
+    vmem_vs2select=32'b0;
     operand_v1 = 512'b0;
     operand_v2 = 512'b0;
     
@@ -148,9 +163,22 @@ module v_inst_decode #(
       7'b0000111: begin  
           rs1_en = 1'b1;
           vmem_ren = 1'b1;
-          vmem_addr = rs1_dout_i; 
           vid_wb_en = 1'b1;
           vid_wb_sel = 1'b1;
+          case (funct3[1:0])
+            2'b00: begin
+              vmem_addr = rs1_dout_i; 
+            end
+            2'b01: begin
+              vmem_addr = 64'h80800000+funct7[6:4]*196+(rs1_dout_i+{62'b0,funct7[3:2]})*14+{62'b0,funct7[1:0]};
+              vid_wb_double = 1'b1;
+              vmem_opcode=VMEM_OP_CONV1;
+              vs2_en = 1'b1;
+              vmem_vs2select[7:0]=vs2_dout_i[((funct7[6:4] * 9) + (funct7[3:2] * 3) + {2'b0,funct7[1:0]}) * 8 +: 8];
+              vmem_vs2select[31:8]={24{vs2_dout_i[((funct7[6:4] * 9) + (funct7[3:2] * 3) + {2'b0,funct7[1:0]}) * 8 +7]}};
+            end
+            default: ;
+          endcase
       end
       7'b0100111: begin 
           rs1_en = 1'b1;

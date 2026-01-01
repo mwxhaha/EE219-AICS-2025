@@ -6,8 +6,10 @@ module v_regfile #(
   input                       rst,
 
   input                       vwb_en_i,
+  input                       vwb_double_i,
   input       [VREG_AW-1:0]   vwb_addr_i,
-  input       [VREG_DW-1:0]   vwb_data_i,
+  input       [1024-1:0]      vwb_data_i,
+  output reg      [1024-1:0]     vd_data_o,
 
   input                       vs1_en_i,
   input       [VREG_AW-1:0]   vs1_addr_i,
@@ -27,8 +29,25 @@ module v_regfile #(
             end
         end else begin
             if ( vwb_en_i == 1'b1 ) begin
-                v_regfile[ vwb_addr_i ] <= vwb_data_i ;
+                if (vwb_double_i == 1'b1) begin
+                    v_regfile[ vwb_addr_i ] <= vwb_data_i[511:0];    
+                    v_regfile[ vwb_addr_i + 1'b1 ] <= vwb_data_i[1023:512]; 
+                end else begin
+                    v_regfile[ vwb_addr_i ] <= vwb_data_i[511:0];
+                end
             end 
+        end
+    end
+
+    always @(*) begin
+        if( rst == 1'b1 ) begin
+            vd_data_o = {1024{1'b0}} ;
+        end else begin
+            if ( vwb_en_i ) begin
+                vd_data_o = {v_regfile[vwb_addr_i + 1'b1], v_regfile[vwb_addr_i]};
+            end else begin
+                vd_data_o = {1024{1'b0}} ;
+            end
         end
     end
 

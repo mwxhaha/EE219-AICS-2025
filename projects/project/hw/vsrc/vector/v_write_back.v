@@ -6,20 +6,23 @@ module v_write_back #(
   input                   rst,
 
   input                   vid_wb_en_i,
+  input                   vid_wb_double_i,
   input                   vid_wb_sel_i,
   input   [VREG_AW-1:0]   vid_wb_addr_i,
   input   [VREG_DW-1:0]   valu_result_i,
-  input   [VREG_DW-1:0]   vmem_result_i,
+  input   [1024-1:0]      vmem_result_i,
 
   output                  vwb_en_o,
+  output                  vwb_double_o,
   output  [VREG_AW-1:0]   vwb_addr_o,
-  output  [VREG_DW-1:0]   vwb_data_o
+  output  [1024-1:0]      vwb_data_o
 );
 
 assign vwb_en_o     = (rst == 1'b1) ? 0 : vid_wb_en_i ;
+assign vwb_double_o = (rst == 1'b1) ? 0 : vid_wb_double_i ;
 assign vwb_addr_o   = (rst == 1'b1) ? 0 : vid_wb_addr_i ;
 
 assign vwb_data_o   = (rst == 1'b1)   ? 0                          : 
-                      vid_wb_sel_i    ? vmem_result_i              : valu_result_i ;
+                      vid_wb_sel_i    ? vmem_result_i              : {512'b0,valu_result_i} ;
 
 endmodule 
