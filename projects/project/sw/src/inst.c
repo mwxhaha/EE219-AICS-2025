@@ -1,5 +1,27 @@
 #include "trap.h"
 
+#ifndef __INST_H__
+#define __INST_H__
+
+#define INST_OPV_BIN(funct6, vm, vs2, vs1, funct3, vd, opcode) 0b##funct6##vm##vs2##vs1##funct3##vd##opcode
+#define WORD(inst) ".word " #inst ""
+#define ASM_CUSTOM(inst) WORD(inst)
+#define PUTCH ASM_CUSTOM(0x0005007f)
+
+int custom_mul(int a, int b) {
+    int result;
+    asm volatile(".insn r 0x33, 0, 1, %0, %1, %2" : "=r"(result) : "r"(a), "r"(b));
+    return result;
+}
+
+void custom_putch_1(char ch) {
+    asm volatile("mv a0, %0; " PUTCH " " : : "r"(ch));
+}
+
+void custom_putch_2() {
+    asm volatile(ASM_CUSTOM(INST_OPV_BIN(000000, 1, 00000, 00000, 000, 00000, 1010111)));
+}
+
 // 所有向量寄存器初始化0
 
 // 加载512位
@@ -62,3 +84,14 @@
 
 // 对vs1第1个元素和vs2的前10个元素求和，将结果写入vd每个元素中
 #define vred10sum32_vs(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+
+// 定制指令
+#define vleinputconv1mac_vx(vd, rs1, vs2, imm123) asm volatile(".insn r 0x57, 0x4, " #imm123 ",  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vseoutputconv11_v(vs3, rs1) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vs3 ", %0,  x0" ::"r"(rs1))
+#define vseoutputconv12_v(vs3, rs1) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vs3 ", %0,  x0" ::"r"(rs1))
+
+#define vleoutputpool1mac_vx(vd, rs1, vs2, imm1, imm2) asm volatile(".insn r 0x57, " #imm1 ", " #imm2 ",  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+
+#define vleoutputfc1mac_vx(vd, rs1, vs2, imm1) asm volatile(".insn r 0x57, 0x4, " #imm1 ",  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+
+#endif
