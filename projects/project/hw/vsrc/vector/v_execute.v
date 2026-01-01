@@ -15,6 +15,7 @@ module v_execute #(
   localparam VALU_OP_VADD16       = 5'd2  ;
   localparam VALU_OP_VDIV16       = 5'd3 ; 
   localparam VALU_OP_VMAX16       = 5'd4  ;
+  localparam VALU_OP_VPOOL16      = 5'd14  ;
   localparam VALU_OP_VMUL16to32   = 5'd5  ;
   localparam VALU_OP_VADD32       = 5'd6  ;
   localparam VALU_OP_VDIV32       = 5'd7 ; 
@@ -47,6 +48,7 @@ module v_execute #(
   
   integer j;
   reg signed [31:0] temp;
+  reg signed [15:0] max_val;
   always @(*) begin
     for (j = 0; j < 32; j = j + 1) begin
       result_elements16[j] = 0;
@@ -56,6 +58,7 @@ module v_execute #(
     end
     valu_result_o=0;
     temp=0;
+    max_val=0;
 
     case (valu_opcode_i)
       VALU_OP_VMUL8to16: begin
@@ -81,6 +84,25 @@ module v_execute #(
           result_elements16[j] = (op2_elements16[j] > op1_elements16[j]) ? 
                               op2_elements16[j] : op1_elements16[j];
           valu_result_o[j*16+:16] = result_elements16[j];
+        end
+      end
+
+      VALU_OP_VPOOL16: begin
+        integer k;
+        for (j = 0; j < 32; j = j + 1) begin
+          result_elements16[j] = 0;
+          valu_result_o[j*16+:16] = 0;
+        end
+        for (k = 0; k < 6; k = k + 1) begin
+          max_val = op1_elements16[k*2];
+          if (op1_elements16[k*2 + 1] > max_val) 
+            max_val = op1_elements16[k*2 + 1];
+          if (op1_elements16[k*2 + 12] > max_val) 
+            max_val = op1_elements16[k*2 + 12];
+          if (op1_elements16[k*2 + 13] > max_val) 
+            max_val = op1_elements16[k*2 + 13];
+          result_elements16[k] = max_val;
+          valu_result_o[k*16+:16] = max_val;
         end
       end
 

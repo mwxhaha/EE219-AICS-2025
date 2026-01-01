@@ -46,7 +46,7 @@ void custom_putch_2() {
 
 // pool1
 // 24个16位元素池化得到6个16位元素，多余元素忽略，多余结果元素置0
-#define vpool16_vv(vd, vs1) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x0")
+#define vpool16_vv(vd, vs1) asm volatile(".insn r 0x57, 0x0, 0x0d, x" #vd ", x" #vs1 ", x0")
 
 // fc1
 #define vmul16to32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x04, x" #vd ", x" #vs1 ", x" #vs2 "")

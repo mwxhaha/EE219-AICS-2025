@@ -45,6 +45,7 @@ module v_inst_decode #(
   localparam VALU_OP_VADD16       = 5'd2  ;
   localparam VALU_OP_VDIV16       = 5'd3 ; 
   localparam VALU_OP_VMAX16       = 5'd4  ;
+  localparam VALU_OP_VPOOL16      = 5'd14  ;
   localparam VALU_OP_VMUL16to32   = 5'd5  ;
   localparam VALU_OP_VADD32       = 5'd6  ;
   localparam VALU_OP_VDIV32       = 5'd7 ; 
@@ -222,6 +223,20 @@ module v_inst_decode #(
             case (funct3)
               3'b011: begin
                 operand_v1 = {32{imm[15:0]}};
+              end
+              default: ;
+            endcase
+          end
+
+          7'b001101: begin
+            vs2_en = 1'b1;
+            operand_v2 = vs2_dout_i;
+            valu_opcode = VALU_OP_VPOOL16;
+            vid_wb_en = 1'b1;
+            case (funct3)
+              3'b000: begin
+                vs1_en = 1'b1;
+                operand_v1 = vs1_dout_i;
               end
               default: ;
             endcase
