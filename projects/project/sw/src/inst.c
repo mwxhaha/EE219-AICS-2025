@@ -71,19 +71,19 @@ void custom_putch_2() {
 #define vmul32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x08,  x" #vd ", x" #imm ",  x" #vs2 "")
 
 // softmax2
-#define vmin32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
-#define vmin32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
-#define vmin32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
+#define vmin32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x09, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vmin32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x09,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vmin32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x09,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-#define vsub32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
-#define vsub32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
-#define vsub32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
+#define vsub32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x0a, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vsub32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x0a,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vsub32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x0a,  x" #vd ", x" #imm ",  x" #vs2 "")
 
 // 对vs1第1个元素和vs2的前10个元素求最大，将结果写入vd每个元素中
-#define vred10max32_vs(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vred10max32_vs(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x0b, x" #vd ", x" #vs1 ", x" #vs2 "")
 
 // 对vs1第1个元素和vs2的前10个元素求和，将结果写入vd每个元素中
-#define vred10sum32_vs(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vred10sum32_vs(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x0c, x" #vd ", x" #vs1 ", x" #vs2 "")
 
 // 定制指令
 #define vleinputconv1mac_vx(vd, rs1, vs2, imm123) asm volatile(".insn r 0x57, 0x4, " #imm123 ",  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))

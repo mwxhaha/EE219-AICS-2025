@@ -50,6 +50,11 @@ module v_inst_decode #(
   localparam VALU_OP_VDIV32       = 5'd7 ; 
   localparam VALU_OP_VMAX32       = 5'd8  ;
   localparam VALU_OP_VMUL32       = 5'd9  ;
+  localparam VALU_OP_VMIN32       = 5'd10  ;
+  localparam VALU_OP_VSUB32       = 5'd11  ;
+  localparam VALU_OP_VRED10MAX32  = 5'd12  ;
+  localparam VALU_OP_VRED10SUM32  = 5'd13  ;
+
   wire [6:0]  opcode   = inst_i[6:0];
   wire [4:0]  vd       = inst_i[11:7];
   wire [2:0]  funct3   = inst_i[14:12];
@@ -323,7 +328,77 @@ module v_inst_decode #(
               default: ;
             endcase
           end
-          
+
+          7'b001001: begin
+            vs2_en = 1'b1;
+            operand_v2 = vs2_dout_i;
+            valu_opcode = VALU_OP_VMIN32;
+            vid_wb_en = 1'b1;
+            case (funct3)
+              3'b000: begin
+                vs1_en = 1'b1;
+                operand_v1 = vs1_dout_i;
+              end
+              3'b100: begin
+                rs1_en = 1'b1;
+                operand_v1 = {16{rs1_dout_i[31:0]}};
+              end
+              3'b011: begin
+                operand_v1 = {16{imm[31:0]}};
+              end
+              default: ;
+            endcase
+          end
+          7'b001010: begin
+            vs2_en = 1'b1;
+            operand_v2 = vs2_dout_i;
+            valu_opcode = VALU_OP_VSUB32;
+            vid_wb_en = 1'b1;
+            case (funct3)
+              3'b000: begin
+                vs1_en = 1'b1;
+                operand_v1 = vs1_dout_i;
+              end
+              3'b100: begin
+                rs1_en = 1'b1;
+                operand_v1 = {16{rs1_dout_i[31:0]}};
+              end
+              3'b011: begin
+                operand_v1 = {16{imm[31:0]}};
+              end
+              default: ;
+            endcase
+          end
+          7'b001011: begin
+            vs2_en = 1'b1;
+            operand_v2 = vs2_dout_i;
+            valu_opcode = VALU_OP_VRED10MAX32;
+            vid_wb_en = 1'b1;
+            case (funct3)
+              3'b000: begin
+                vs1_en = 1'b1;
+                operand_v1 = vs1_dout_i;
+              end
+              default: ;
+            endcase
+          end
+          7'b001100: begin
+            vs2_en = 1'b1;
+            operand_v2 = vs2_dout_i;
+            valu_opcode = VALU_OP_VRED10SUM32;
+            vid_wb_en = 1'b1;
+            case (funct3)
+              3'b000: begin
+                vs1_en = 1'b1;
+                operand_v1 = vs1_dout_i;
+              end
+              default: ;
+            endcase
+          end
+
+
+
+
           default: ;
         endcase
       end
