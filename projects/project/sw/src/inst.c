@@ -49,21 +49,21 @@ void custom_putch_2() {
 #define vpool16_vv(vd, vs1) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x0")
 
 // fc1
-#define vmul16to32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
-#define vmul16to32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
-#define vmul16to32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
+#define vmul16to32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x04, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vmul16to32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x04,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vmul16to32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x04,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-#define vadd32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
-#define vadd32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
-#define vadd32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
+#define vadd32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x05, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vadd32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x05,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vadd32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x05,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-#define vdiv32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
-#define vdiv32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
-#define vdiv32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
+#define vdiv32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x06, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vdiv32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x06,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vdiv32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x06,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-#define vmax32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")
-#define vmax32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
-#define vmax32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x01,  x" #vd ", x" #imm ",  x" #vs2 "")
+#define vmax32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x07, x" #vd ", x" #vs1 ", x" #vs2 "")
+#define vmax32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x07,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vmax32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x07,  x" #vd ", x" #imm ",  x" #vs2 "")
 
 // fc2
 #define vmul32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x01, x" #vd ", x" #vs1 ", x" #vs2 "")

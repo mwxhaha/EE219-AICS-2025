@@ -40,16 +40,15 @@ module v_inst_decode #(
 
 );
 
-  localparam VALU_OP_NOP        = 5'd0  ;
-  localparam VALU_OP_VMUL       = 5'd1  ;
-  localparam VALU_OP_VADD       = 5'd2  ;
-  // localparam VALU_OP_VSUB       = 5'd3  ;
-  localparam VALU_OP_VDIV       = 5'd3 ; 
-  // localparam VALU_OP_VMIN       = 5'd4  ;
-  localparam VALU_OP_VMAX       = 5'd4  ;
-  // localparam VALU_OP_VSRA       = 5'd6  ;
-  // localparam VALU_OP_VREDSUM_VS = 5'd7  ;
-  // localparam VALU_OP_VREDMAX_VS = 5'd8  ;
+  localparam VALU_OP_NOP          = 5'd0  ;
+  localparam VALU_OP_VMUL8to16    = 5'd1  ;
+  localparam VALU_OP_VADD16       = 5'd2  ;
+  localparam VALU_OP_VDIV16       = 5'd3 ; 
+  localparam VALU_OP_VMAX16       = 5'd4  ;
+  localparam VALU_OP_VMUL16to32   = 5'd5  ;
+  localparam VALU_OP_VADD32       = 5'd6  ;
+  localparam VALU_OP_VDIV32       = 5'd7 ; 
+  localparam VALU_OP_VMAX32       = 5'd8  ;
   wire [6:0]  opcode   = inst_i[6:0];
   wire [4:0]  vd       = inst_i[11:7];
   wire [2:0]  funct3   = inst_i[14:12];
@@ -75,6 +74,22 @@ module v_inst_decode #(
           wire [7:0] byte_in = vs2_dout_i[255 - i*8 : 248 - i*8];
           wire [15:0] extended = {{8{byte_in[7]}}, byte_in};
           assign vs2_dout_i8to16[511 - i*16 : 496 - i*16] = extended;
+      end
+  endgenerate
+  wire [511:0] vs1_dout_i16to32;
+  generate
+      for (i = 0; i < 16; i = i + 1) begin
+          wire [15:0] byte_in = vs1_dout_i[255 - i*16 : 240 - i*16];
+          wire [31:0] extended = {{16{byte_in[15]}}, byte_in};
+          assign vs1_dout_i16to32[511 - i*32 : 480 - i*32] = extended;
+      end
+  endgenerate
+  wire [511:0] vs2_dout_i16to32;
+  generate
+      for (i = 0; i < 16; i = i + 1) begin
+          wire [15:0] byte_in = vs2_dout_i[255 - i*16 : 240 - i*16];
+          wire [31:0] extended = {{16{byte_in[15]}}, byte_in};
+          assign vs2_dout_i16to32[511 - i*32 : 480 - i*32] = extended;
       end
   endgenerate
   
@@ -142,7 +157,7 @@ module v_inst_decode #(
           7'b000000: begin 
             vs2_en = 1'b1;
             operand_v2 = vs2_dout_i8to16;
-            valu_opcode = VALU_OP_VMUL;
+            valu_opcode = VALU_OP_VMUL8to16;
             vid_wb_en = 1'b1;
             case (funct3)
               3'b000: begin
@@ -163,7 +178,7 @@ module v_inst_decode #(
           7'b000001: begin
             vs2_en = 1'b1;
             operand_v2 = vs2_dout_i;
-            valu_opcode = VALU_OP_VADD;
+            valu_opcode = VALU_OP_VADD16;
             vid_wb_en = 1'b1;
             case (funct3)
               3'b000: begin
@@ -184,7 +199,7 @@ module v_inst_decode #(
           7'b000010: begin
             vs2_en = 1'b1;
             operand_v2 = vs2_dout_i;
-            valu_opcode = VALU_OP_VDIV;
+            valu_opcode = VALU_OP_VDIV16;
             vid_wb_en = 1'b1;
             case (funct3)
               3'b100: begin
@@ -198,11 +213,95 @@ module v_inst_decode #(
           7'b000011: begin
             vs2_en = 1'b1;
             operand_v2 = vs2_dout_i;
-            valu_opcode = VALU_OP_VMAX;
+            valu_opcode = VALU_OP_VMAX16;
             vid_wb_en = 1'b1;
             case (funct3)
               3'b011: begin
                 operand_v1 = {32{imm[15:0]}};
+              end
+              default: ;
+            endcase
+          end
+
+          7'b0000100: begin 
+            vs2_en = 1'b1;
+            operand_v2 = vs2_dout_i16to32;
+            valu_opcode = VALU_OP_VMUL16to32;
+            vid_wb_en = 1'b1;
+            case (funct3)
+              3'b000: begin
+                vs1_en = 1'b1;
+                operand_v1 = vs1_dout_i16to32;
+              end
+              3'b100: begin
+                rs1_en = 1'b1;
+                operand_v1 = {16{{16{rs1_dout_i[15]}}, rs1_dout_i[15:0]}};
+              end
+              3'b011: begin
+                operand_v1 = {16{imm[31:0]}};
+              end
+              default: ;
+            endcase
+          end
+          
+          7'b000101: begin
+            vs2_en = 1'b1;
+            operand_v2 = vs2_dout_i;
+            valu_opcode = VALU_OP_VADD32;
+            vid_wb_en = 1'b1;
+            case (funct3)
+              3'b000: begin
+                vs1_en = 1'b1;
+                operand_v1 = vs1_dout_i;
+              end
+              3'b100: begin
+                rs1_en = 1'b1;
+                operand_v1 = {16{rs1_dout_i[31:0]}};
+              end
+              3'b011: begin
+                operand_v1 = {16{imm[31:0]}};
+              end
+              default: ;
+            endcase
+          end
+          
+          7'b000110: begin
+            vs2_en = 1'b1;
+            operand_v2 = vs2_dout_i;
+            valu_opcode = VALU_OP_VDIV32;
+            vid_wb_en = 1'b1;
+            case (funct3)
+              3'b000: begin
+                vs1_en = 1'b1;
+                operand_v1 = vs1_dout_i;
+              end
+              3'b100: begin
+                rs1_en = 1'b1;
+                operand_v1 = {16{rs1_dout_i[31:0]}};
+              end
+              3'b011: begin
+                operand_v1 = {16{imm[31:0]}};
+              end
+              default: ;
+            endcase
+          end
+
+          7'b000111: begin
+            vs2_en = 1'b1;
+            operand_v2 = vs2_dout_i;
+            valu_opcode = VALU_OP_VMAX32;
+            vid_wb_en = 1'b1;
+            case (funct3)
+              3'b000: begin
+                vs1_en = 1'b1;
+                operand_v1 = vs1_dout_i;
+              end
+              3'b100: begin
+                rs1_en = 1'b1;
+                operand_v1 = {16{rs1_dout_i[31:0]}};
+              end
+              3'b011: begin
+                operand_v1 = {16{imm[31:0]}};
               end
               default: ;
             endcase
