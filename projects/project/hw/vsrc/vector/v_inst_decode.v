@@ -151,7 +151,7 @@ module v_inst_decode #(
               end
               3'b100: begin
                 rs1_en = 1'b1;
-                operand_v1 = {32{rs1_dout_i[15:0]}};
+                operand_v1 = {32{{8{rs1_dout_i[7]}}, rs1_dout_i[7:0]}};
               end
               3'b011: begin
                 operand_v1 = {32{imm[15:0]}};
@@ -168,7 +168,7 @@ module v_inst_decode #(
             case (funct3)
               3'b000: begin
                 vs1_en = 1'b1;
-                operand_v2 = vs2_dout_i;
+                operand_v1 = vs1_dout_i;
               end
               3'b100: begin
                 rs1_en = 1'b1;
