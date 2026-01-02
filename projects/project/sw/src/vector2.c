@@ -314,5 +314,5 @@ void fc2vector2(int32_t input[60], int32_t weight[60][10], int32_t bias[10], int
     vleoutputfc1mac_vx(2, 0, 1, 0b0111010);
     vleoutputfc1mac_vx(2, 0, 1, 0b0111011);
 
-    vse_v(1, &output[0]);
+    vse_v(2, &output[0]);
 }

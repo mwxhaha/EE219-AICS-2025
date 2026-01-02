@@ -92,6 +92,6 @@ void custom_putch_2() {
 
 #define vleoutputpool1mac_vx(vd, rs1, vs2, imm1, imm2) asm volatile(".insn r 0x07, " #imm1 ", " #imm2 ",  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
 
-#define vleoutputfc1mac_vx(vd, rs1, vs2, imm1) asm volatile(".insn r 0x57, 0x4, " #imm1 ",  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vleoutputfc1mac_vx(vd, rs1, vs2, imm1) asm volatile(".insn r 0x07, 0x3, " #imm1 ",  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
 
 #endif

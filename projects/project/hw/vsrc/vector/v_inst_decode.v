@@ -64,6 +64,7 @@ module v_inst_decode #(
   localparam VMEM_OP_outputconv11  = 5'd2  ;
   localparam VMEM_OP_outputconv12  = 5'd3  ;
   localparam VMEM_OP_outputpool1   = 5'd4  ;
+  localparam VMEM_OP_outputfc1     = 5'd5  ;
 
   wire [6:0]  opcode   = inst_i[6:0];
   wire [4:0]  vd       = inst_i[11:7];
@@ -187,6 +188,12 @@ module v_inst_decode #(
               vs2_en = 1'b1;
               vmem_vs2select[15:0]=vs2_dout_i[{funct7,funct3[2]} % 32 * 16 +: 16];
               vmem_vs2select[31:16]={16{vs2_dout_i[{funct7,funct3[2]} % 32 * 16 + 15]}};
+            end
+            2'b11: begin
+              vmem_addr = 64'h80809000+(rs1_dout_i+funct7*10)*4;
+              vmem_opcode=VMEM_OP_outputfc1;
+              vs2_en = 1'b1;
+              vmem_vs2select=vs2_dout_i[funct7 % 16 * 32 +: 32];
             end
             default: ;
           endcase

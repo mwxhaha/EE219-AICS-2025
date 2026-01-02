@@ -29,6 +29,7 @@ module v_mem #(
   localparam VMEM_OP_outputconv11  = 5'd2  ;
   localparam VMEM_OP_outputconv12  = 5'd3  ;
   localparam VMEM_OP_outputpool1   = 5'd4  ;
+  localparam VMEM_OP_outputfc1     = 5'd5  ;
 
   assign vram_ren_o   = vmem_ren_i ;
   assign vram_wen_o   = vmem_wen_i ;
@@ -115,9 +116,18 @@ module v_mem #(
       assign fc1_result[(i*32)+31 : (i*32)]=vd_32bit+$signed(vmem_vs2select_i) * vmem_32bit_sign_ext;
     end
   endgenerate
+  wire [512-1:0] fc2_result;
+  generate
+    for (genvar i = 0; i < 16; i = i + 1) begin 
+      wire signed [31:0] vmem_32bit = vmem_dout[(i*32)+31 : (i*32)];
+      wire signed [31:0] vd_32bit = vd_data_i[(i*32)+31 : (i*32)];
+      assign fc2_result[(i*32)+31 : (i*32)]=vd_32bit+$signed(vmem_vs2select_i) * vmem_32bit;
+    end
+  endgenerate
   
   assign vmem_dout_o  = vmem_opcode_i==VMEM_OP_inputconv1  ? conv_result : 
-                        vmem_opcode_i==VMEM_OP_outputpool1 ? fc1_result  : {512'b0,vmem_dout};
+                        vmem_opcode_i==VMEM_OP_outputpool1 ? fc1_result  : 
+                        vmem_opcode_i==VMEM_OP_outputfc1   ? {512'b0,fc2_result}  : {512'b0,vmem_dout};
   
 
 endmodule
