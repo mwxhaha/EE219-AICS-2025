@@ -28,6 +28,7 @@ module v_mem #(
   localparam VMEM_OP_inputconv1    = 5'd1  ;
   localparam VMEM_OP_outputconv11  = 5'd2  ;
   localparam VMEM_OP_outputconv12  = 5'd3  ;
+  localparam VMEM_OP_outputpool1   = 5'd4  ;
 
   assign vram_ren_o   = vmem_ren_i ;
   assign vram_wen_o   = vmem_wen_i ;
@@ -98,23 +99,25 @@ module v_mem #(
 
   wire [1024-1:0] conv_result;
   generate
-    for (genvar i = 0; i < 64; i = i + 1) begin : conv_calc
-      wire [7:0]  vmem_8bit;
-      wire [15:0] vmem_16bit_sign_ext;
-      wire [15:0] vd_16bit;
-      wire [15:0] product;
-      
+    for (genvar i = 0; i < 64; i = i + 1) begin
       wire [7:0] vmem_8bit = vmem_dout[(i*8)+7 : (i*8)];
       wire signed [15:0] vmem_16bit_sign_ext = {{8{vmem_8bit[7]}}, vmem_8bit};
       wire signed [15:0] vd_16bit = vd_data_i[(i*16)+15 : (i*16)];
-      
       assign conv_result[(i*16)+15 : (i*16)]=vd_16bit+$signed(vmem_vs2select_i[15:0]) * vmem_16bit_sign_ext;
     end
   endgenerate
+  wire [1024-1:0] fc1_result;
+  generate
+    for (genvar i = 0; i < 32; i = i + 1) begin 
+      wire [15:0] vmem_16bit = vmem_dout[(i*16)+15 : (i*16)];
+      wire signed [31:0] vmem_32bit_sign_ext = {{16{vmem_16bit[15]}}, vmem_16bit};
+      wire signed [31:0] vd_32bit = vd_data_i[(i*32)+31 : (i*32)];
+      assign fc1_result[(i*32)+31 : (i*32)]=vd_32bit+$signed(vmem_vs2select_i) * vmem_32bit_sign_ext;
+    end
+  endgenerate
   
-  
-  assign vmem_dout_o  = vmem_opcode_i==VMEM_OP_NOP ? {512'b0,vmem_dout} : 
-                        vmem_opcode_i==VMEM_OP_inputconv1 ? conv_result : 0;
+  assign vmem_dout_o  = vmem_opcode_i==VMEM_OP_inputconv1  ? conv_result : 
+                        vmem_opcode_i==VMEM_OP_outputpool1 ? fc1_result  : {512'b0,vmem_dout};
   
 
 endmodule
