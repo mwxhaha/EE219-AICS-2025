@@ -72,7 +72,7 @@ void conv1vector2(int8_t input[6][14][14], int8_t weight[4][6][3][3], int16_t sc
             vmax16_vi(2, 0, 2);
             vmax16_vi(3, 0, 3);
             vseoutputconv11_v(2, &output[f][h][0]);
-            vseoutputconv11_v(3, &output[f][h + 2][4]);
+            vseoutputconv12_v(3, &output[f][h + 2][4]);
         }
     }
 }

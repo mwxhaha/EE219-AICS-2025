@@ -59,8 +59,10 @@ module v_inst_decode #(
   localparam VALU_OP_VRED10MAX32  = 5'd12  ;
   localparam VALU_OP_VRED10SUM32  = 5'd13  ;
   
-  localparam VMEM_OP_NOP          = 5'd0  ;
-  localparam VMEM_OP_CONV1          = 5'd1  ;
+  localparam VMEM_OP_NOP           = 5'd0  ;
+  localparam VMEM_OP_inputconv1    = 5'd1  ;
+  localparam VMEM_OP_outputconv11  = 5'd2  ;
+  localparam VMEM_OP_outputconv12  = 5'd3  ;
 
   wire [6:0]  opcode   = inst_i[6:0];
   wire [4:0]  vd       = inst_i[11:7];
@@ -172,7 +174,7 @@ module v_inst_decode #(
             2'b01: begin
               vmem_addr = 64'h80800000+funct7[6:4]*196+(rs1_dout_i+{62'b0,funct7[3:2]})*14+{62'b0,funct7[1:0]};
               vid_wb_double = 1'b1;
-              vmem_opcode=VMEM_OP_CONV1;
+              vmem_opcode=VMEM_OP_inputconv1;
               vs2_en = 1'b1;
               vmem_vs2select[7:0]=vs2_dout_i[((funct7[6:4] * 9) + (funct7[3:2] * 3) + {2'b0,funct7[1:0]}) * 8 +: 8];
               vmem_vs2select[31:8]={24{vs2_dout_i[((funct7[6:4] * 9) + (funct7[3:2] * 3) + {2'b0,funct7[1:0]}) * 8 +7]}};
@@ -185,7 +187,18 @@ module v_inst_decode #(
           vs2_en = 1'b1;
           vmem_wen = 1'b1;
           vmem_addr = rs1_dout_i; 
-          vmem_din = vs2_dout_i;  
+          vmem_din = vs2_dout_i; 
+          case (funct3)
+            3'b000: begin
+            end
+            3'b001: begin
+              vmem_opcode=VMEM_OP_outputconv11;
+            end
+            3'b010: begin
+              vmem_opcode=VMEM_OP_outputconv12;
+            end
+            default: ;
+          endcase 
       end
 
       7'b1010111: begin

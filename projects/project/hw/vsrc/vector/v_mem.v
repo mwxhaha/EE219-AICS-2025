@@ -24,24 +24,42 @@ module v_mem #(
     input   [VRAM_DW-1:0]   vram_dout_i
 );
   
-  localparam VMEM_OP_NOP          = 5'd0  ;
-  localparam VMEM_OP_CONV1          = 5'd1  ;
+  localparam VMEM_OP_NOP           = 5'd0  ;
+  localparam VMEM_OP_inputconv1    = 5'd1  ;
+  localparam VMEM_OP_outputconv11  = 5'd2  ;
+  localparam VMEM_OP_outputconv12  = 5'd3  ;
 
   assign vram_ren_o   = vmem_ren_i ;
   assign vram_wen_o   = vmem_wen_i ;
   assign vram_addr_o  = vmem_addr_i ;
 
+  reg [VMEM_DW-1:0] vmem_din;
+  always@(*) begin
+    if (vmem_opcode_i == VMEM_OP_outputconv11) begin
+      vmem_din[12*16-1:0] = vmem_din_i[12*16-1:0];  
+      vmem_din[24*16-1:12*16] = vmem_din_i[26*16-1:14*16]; 
+      vmem_din[28*16-1:24*16] = vmem_din_i[32*16-1:28*16]; 
+      vmem_din[32*16-1:28*16] = 0; 
+    end else if (vmem_opcode_i == VMEM_OP_outputconv12) begin
+      vmem_din[8*16-1:0] = vmem_din_i[8*16-1:0];  
+      vmem_din[20*16-1:8*16] = vmem_din_i[22*16-1:10*16]; 
+      vmem_din[32*16-1:20*16] = 0; 
+    end else begin
+      vmem_din = vmem_din_i;
+    end
+  end
+
   reg [VMEM_DW-1:0] vram_din;
   always@(*) begin
     case (vmem_addr_i[2:0])
-      3'b000: vram_din=vmem_din_i;
-      3'b001: vram_din={vmem_din_i[503:0],8'b0};
-      3'b010: vram_din={vmem_din_i[495:0],16'b0};
-      3'b011: vram_din={vmem_din_i[487:0],24'b0};
-      3'b100: vram_din={vmem_din_i[479:0],32'b0};
-      3'b101: vram_din={vmem_din_i[471:0],40'b0};
-      3'b110: vram_din={vmem_din_i[463:0],48'b0};
-      3'b111: vram_din={vmem_din_i[455:0],56'b0};
+      3'b000: vram_din=vmem_din;
+      3'b001: vram_din={vmem_din[503:0],8'b0};
+      3'b010: vram_din={vmem_din[495:0],16'b0};
+      3'b011: vram_din={vmem_din[487:0],24'b0};
+      3'b100: vram_din={vmem_din[479:0],32'b0};
+      3'b101: vram_din={vmem_din[471:0],40'b0};
+      3'b110: vram_din={vmem_din[463:0],48'b0};
+      3'b111: vram_din={vmem_din[455:0],56'b0};
       default: ;
     endcase
   end
@@ -96,7 +114,7 @@ module v_mem #(
   
   
   assign vmem_dout_o  = vmem_opcode_i==VMEM_OP_NOP ? {512'b0,vmem_dout} : 
-                        vmem_opcode_i==VMEM_OP_CONV1 ? conv_result : 0;
+                        vmem_opcode_i==VMEM_OP_inputconv1 ? conv_result : 0;
   
 
 endmodule

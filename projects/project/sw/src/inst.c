@@ -65,8 +65,6 @@ void custom_putch_2() {
 #define vmax32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x07,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
 #define vmax32_vi(vd, imm, vs2) asm volatile(".insn r 0x57, 0x3, 0x07,  x" #vd ", x" #imm ",  x" #vs2 "")
 
-#define vleinputconv1mac_vx(vd, rs1, vs2, imm123) asm volatile(".insn r 0x07, 0x01, " #imm123 ",  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
-
 // fc2
 #define vmul32_vv(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x08, x" #vd ", x" #vs1 ", x" #vs2 "")
 #define vmul32_vx(vd, rs1, vs2) asm volatile(".insn r 0x57, 0x4, 0x08,  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
@@ -88,8 +86,9 @@ void custom_putch_2() {
 #define vred10sum32_vs(vd, vs1, vs2) asm volatile(".insn r 0x57, 0x0, 0x0c, x" #vd ", x" #vs1 ", x" #vs2 "")
 
 // 定制指令
-#define vseoutputconv11_v(vs3, rs1) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vs3 ", %0,  x0" ::"r"(rs1))
-#define vseoutputconv12_v(vs3, rs1) asm volatile(".insn r 0x57, 0x4, 0x01,  x" #vs3 ", %0,  x0" ::"r"(rs1))
+#define vleinputconv1mac_vx(vd, rs1, vs2, imm123) asm volatile(".insn r 0x07, 0x1, " #imm123 ",  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
+#define vseoutputconv11_v(vs3, rs1) asm volatile(".insn r 0x27, 0x1, 0x00,  x" #vs3 ", %0,  x0" ::"r"(rs1))
+#define vseoutputconv12_v(vs3, rs1) asm volatile(".insn r 0x27, 0x2, 0x00,  x" #vs3 ", %0,  x0" ::"r"(rs1))
 
 #define vleoutputpool1mac_vx(vd, rs1, vs2, imm1, imm2) asm volatile(".insn r 0x57, " #imm1 ", " #imm2 ",  x" #vd ", %0,  x" #vs2 "" ::"r"(rs1))
 
